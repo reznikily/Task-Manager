@@ -10,7 +10,7 @@
     <ul>
         {% for task in uncompleted_tasks %}
             <li>
-                {{ task.content }}
+                {{ task.content }} - Due Date: {{ task.due_date }}
                 <a href="/complete/{{ task.id }}">Complete</a>
                 <a href="/edit/{{ task.id }}">Edit</a>
                 <a href="/delete/{{ task.id }}">Delete</a>
@@ -22,8 +22,8 @@
     <ul>
         {% for task in completed_tasks %}
             <li>
-                {{ task.content }}
-                <a href="/incomplete/{{ task.id }}">Incomplete</a>
+                {{ task.content }} - Due Date: {{ task.due_date }} - Completed
+                <a href="/incomplete/{{ task.id }}">Mark as Incomplete</a>
                 <a href="/edit/{{ task.id }}">Edit</a>
                 <a href="/delete/{{ task.id }}">Delete</a>
             </li>
