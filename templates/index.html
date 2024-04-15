@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    <ul>
+        {% for task in tasks %}
+            <li>
+                {{ task.content }}
+                <a href="#" onclick="event.preventDefault(); document.getElementById('edit-form-{{ task.id }}').submit();">Edit</a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('delete-form-{{ task.id }}').submit();">Delete</a>
+                
+                <form id="edit-form-{{ task.id }}" action="/edit/{{ task.id }}" method="get" style="display: none;">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                </form>
+                
+                <form id="delete-form-{{ task.id }}" action="/delete/{{ task.id }}" method="post" style="display: none;">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="_method" value="DELETE">
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/add">Add Task</a>
+</body>
+</html>
