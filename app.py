@@ -16,6 +16,7 @@ csrf = CSRFProtect(app)
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return f'<Task {self.id}: {self.content}>'
@@ -29,7 +30,8 @@ def index():
 def add_task():
     if request.method == 'POST':
         task_content = request.form.get('task')
-        new_task = Task(content=task_content)
+        task_description = request.form.get('description')
+        new_task = Task(content=task_content, description=task_description)
         db.session.add(new_task)
         db.session.commit()
         return redirect(url_for('index'))
@@ -44,6 +46,7 @@ def edit_task(task_id):
     
     if request.method == 'POST':
         task.content = request.form.get('task')
+        task.description = request.form.get('description')
         db.session.commit()
         return redirect(url_for('index'))
     

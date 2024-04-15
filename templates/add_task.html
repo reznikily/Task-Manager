@@ -8,6 +8,7 @@
     <form method="post">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="task" placeholder="Enter task" required>
+        <textarea name="description" placeholder="Enter description"></textarea>
         <input type="submit" value="Add">
     </form>
 </body>

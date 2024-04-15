@@ -8,6 +8,7 @@
     <form method="post">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="task" value="{{ task.content }}" required>
+        <textarea name="description">{{ task.description }}</textarea>
         <input type="submit" value="Update">
     </form>
 </body>
