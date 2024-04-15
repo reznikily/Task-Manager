@@ -17,14 +17,16 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    completed = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return f'<Task {self.id}: {self.content}>'
 
 @app.route('/')
 def index():
-    tasks = Task.query.all()
-    return render_template('index.html', tasks=tasks)
+    uncompleted_tasks = Task.query.filter_by(completed=False).all()
+    completed_tasks = Task.query.filter_by(completed=True).all()
+    return render_template('index.html', uncompleted_tasks=uncompleted_tasks, completed_tasks=completed_tasks)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_task():
@@ -66,6 +68,27 @@ def delete_task(task_id):
 def before_request():
     if request.method == 'POST' and request.form.get('_method'):
         request.environ['REQUEST_METHOD'] = request.form.get('_method').upper()
+
+@app.route('/complete/<int:task_id>')
+def complete_task(task_id):
+    task = Task.query.get(task_id)
+    
+    if task:
+        task.completed = True
+        db.session.commit()
+    
+    return redirect(url_for('index'))
+
+@app.route('/incomplete/<int:task_id>')
+def incomplete_task(task_id):
+    task = Task.query.get(task_id)
+    
+    if task:
+        task.completed = False
+        db.session.commit()
+    
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
