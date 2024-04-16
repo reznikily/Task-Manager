@@ -2,34 +2,61 @@
 <html>
 <head>
     <title>Task Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Task Manager</h1>
+    <header>
+        <div class="container">
+            <h1>Task Manager</h1>
+        </div>
+    </header>
 
-    <h2>Uncompleted Tasks</h2>
-    <ul>
-        {% for task in uncompleted_tasks %}
-            <li>
-                {{ task.content }} - Due Date: {{ task.due_date }}
-                <a href="/complete/{{ task.id }}">Complete</a>
-                <a href="/edit/{{ task.id }}">Edit</a>
-                <a href="/delete/{{ task.id }}">Delete</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/add">Add Task</a></li>
+            </ul>
+        </div>
+    </nav>
 
-    <h2>Completed Tasks</h2>
-    <ul>
-        {% for task in completed_tasks %}
-            <li>
-                {{ task.content }} - Due Date: {{ task.due_date }} - Completed
-                <a href="/incomplete/{{ task.id }}">Mark as Incomplete</a>
-                <a href="/edit/{{ task.id }}">Edit</a>
-                <a href="/delete/{{ task.id }}">Delete</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <main>
+        <div class="container">
+            <h2>Uncompleted Tasks</h2>
+            <ul>
+                {% for task in uncompleted_tasks %}
+                    <li>
+                        <div class="task-details">
+                            <h3 class="task-name">{{ task.content }}</h3> 
+                            <p class="task-due-date">Due Date: {{ task.due_date }}</p>
+                        </div>
+                        <div class="task-actions">
+                            <a href="/complete/{{ task.id }}">Mark as Complete</a>
+                            <a href="/edit/{{ task.id }}">Edit</a>
+                            <a href="/delete/{{ task.id }}">Delete</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
 
-    <a href="/add">Add Task</a>
+            <h2>Completed Tasks</h2>
+            <ul>
+                {% for task in completed_tasks %}
+                    <li class="completed">
+                        <div class="task-details">
+                            <h3 class="task-name">{{ task.content }}</h3> 
+                            <p class="task-due-date">Due Date: {{ task.due_date }}</p>
+                            <p>Completed</p>
+                        </div>
+                        <div class="task-actions">
+                            <a href="/incomplete/{{ task.id }}">Mark as Incomplete</a>
+                            <a href="/edit/{{ task.id }}">Edit</a>
+                            <a href="/delete/{{ task.id }}">Delete</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
 </body>
 </html>

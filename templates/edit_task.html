@@ -2,15 +2,34 @@
 <html>
 <head>
     <title>Edit Task</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Edit Task</h1>
-    <form method="post">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-        <input type="text" name="task" value="{{ task.content }}" required>
-        <textarea name="description">{{ task.description }}</textarea>
-        <input type="date" name="due_date" value="{{ task.due_date }}">
-        <input type="submit" value="Update">
-    </form>
+    <header>
+        <div class="container">
+            <h1>Edit Task</h1>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/add">Add Task</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main>
+        <div class="container">
+            <form method="post">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="task" value="{{ task.content }}" required>
+                <textarea name="description">{{ task.description }}</textarea>
+                <input type="date" name="due_date" value="{{ task.due_date }}">
+                <input type="submit" value="Update">
+            </form>
+        </div>
+    </main>
 </body>
 </html>
