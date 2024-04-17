@@ -8,18 +8,17 @@ Tasks - {{ super() }}
 
 <div class="d-flex flex-column align-items-stretch flex-shrink-1 bg-body-tertiary p-3" style="width: 100vh;">
     <a href="/" class="d-flex align-items-center flex-shrink-1 p-3 link-body-emphasis text-decoration-none border-bottom">
-    <svg class="bi pe-none me-2" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
     <span class="fs-5 fw-semibold">Uncompleted tasks</span>
     </a>
     <div class="list-group list-group-flush border-bottom scrollarea">
         {% if uncompleted_tasks %}
             {% for task in uncompleted_tasks %}
             <button class="list-group-item list-group-item-action py-3 lh-sm" data-bs-toggle="collapse" data-bs-target="#controls-collapse-{{task.id}}" aria-expanded="false" aria-current="true">
-                <div class="d-flex w-100 align-items-center justify-content-between">
-                <strong class="mb-1">{{ task.name }}</strong>
+                <div class="d-flex align-items-center justify-content-between">
+                <strong class="mb-1 col-8 text-wrap text-break">{{ task.name }}</strong>
                 <small>Due: {{ task.due_date }}</small>
                 </div>
-                <div class="col-10 mb-1 small">{{ task.description }}</div>
+                <div class="col-10 small text-wrap text-break">{{ task.description }}</div>
             </button>
             <div class="collapse btn-group rounded-0" role="group" id="controls-collapse-{{task.id}}">
                     <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-outline-primary rounded-0">Edit</a>
@@ -33,25 +32,24 @@ Tasks - {{ super() }}
     </div>
 </div>
 <div class="b-example-divider b-example-vr"></div>
-<div class="d-flex flex-column align-items-stretch flex-shrink-1 bg-body-tertiary p-3" style="width: 100vh;">
+<div class="d-flex flex-column align-items-stretch flex-shrink-1 bg-body-tertiary px-3" style="width: 100vh;">
     <a href="/" class="d-flex align-items-center flex-shrink-1 p-3 link-body-emphasis text-decoration-none border-bottom">
-    <svg class="bi pe-none me-2" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
     <span class="fs-5 fw-semibold">Completed tasks</span>
     </a>
-    <div class="list-group list-group-flush border-bottom scrollarea">
+    <div class="list-group list-group-flush scrollarea" id="accordion">
         {% if completed_tasks %}
             {% for task in completed_tasks %}
-            <button class="list-group-item list-group-item-action py-3 lh-sm" data-bs-toggle="collapse" data-bs-target="#controls-collapse-{{task.id}}" aria-expanded="false" aria-current="true">
-                <div class="d-flex w-100 align-items-center justify-content-between">
-                <strong class="mb-1">{{ task.name }}</strong>
+            <button class="list-group-item list-group-item-action py-3 lh-sm" data-bs-toggle="collapse" data-bs-parent="#accordion" data-bs-target="#controls-collapse-{{task.id}}" aria-expanded="false" aria-current="true">
+                <div class="d-flex align-items-center justify-content-between">
+                <strong class="mb-1 col-8 text-wrap text-break">{{ task.name }}</strong>
                 <small>Due: {{ task.due_date }}</small>
                 </div>
-                <div class="col-10 mb-1 small">{{ task.description }}</div>
+                <div class="col-10 mb-1 small text-wrap text-break">{{ task.description }}</div>
             </button>
-            <div class="collapse btn-group rounded-0" role="group" id="controls-collapse-{{task.id}}">
-                    <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-outline-primary rounded-0">Edit</a>
-                    <a href="{{ url_for('mark_incomplete', task_id=task.id) }} " class="btn btn-outline-primary rounded-0">Mark Incomplete</a>
-                    <a href="{{ url_for('delete_task', task_id=task.id) }}" class="btn btn-outline-primary rounded-0">Delete</a>
+            <div class="collapse btn-group btn-group-sm btn-group-justified rounded-0 border-0" role="group" id="controls-collapse-{{task.id}}">
+                <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-outline-primary rounded-0">Edit</a>
+                <a href="{{ url_for('mark_incomplete', task_id=task.id) }}" class="btn btn-outline-primary rounded-0">Mark Incomplete</a>
+                <a href="{{ url_for('delete_task', task_id=task.id) }}" class="btn btn-outline-primary rounded-0">Delete</a>
             </div>
             {% endfor %}
     {% else %}

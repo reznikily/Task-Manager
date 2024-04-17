@@ -22,12 +22,19 @@ csrf = CSRFProtect(app)
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful. Please log in.', 'success')
-        return redirect(url_for('login'))
+        user = User.query.filter_by(username=form.username.data).first()
+        if not user:
+            user = User(username=form.username.data)
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            flash('Registration successful. Please log in.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash("Username is already exists.", 'error')
+    else:
+        flash("Passwords are not the same.", 'error')
+    
     return render_template('register.html', title='Sign Up', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])

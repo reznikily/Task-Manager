@@ -11,11 +11,11 @@ Edit Task - {{ super() }}
     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
     <div>
         <label class="form-label" for="name">Name</label>
-        <input class="form-control mb-3" type="text" name="name" value="{{ task.name }}" required>
+        <input maxlength="100" class="form-control mb-3" size=32 type="text" name="name" value="{{ task.name }}" required>
     </div>
     <div>
         <label class="form-label" for="description">Description</label>
-        <textarea class="form-control mb-3" name="description">{{ task.description }}</textarea>
+        <textarea maxlength="255" rows="5" cols="50" class="form-control mb-3" name="description">{{ task.description }}</textarea>
     </div>
     <div>
         <label class="form-label" for="due_date">Due Date</label>
