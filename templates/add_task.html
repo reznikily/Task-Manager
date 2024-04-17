@@ -1,35 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Task</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Add Task</h1>
-        </div>
-    </header>
-    
-    <nav>
-        <div class="container">
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/add">Add Task</a></li>
-            </ul>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <main>
-        <div class="container">
-            <form method="post">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                <input type="text" name="task" placeholder="Enter task" required>
-                <textarea name="description" placeholder="Enter description"></textarea>
-                <input type="date" name="due_date" placeholder="Enter due date">
-                <input type="submit" value="Add">
-            </form>
-        </div>
-    </main>
-</body>
-</html>
+{% block title %}
+Add Task - {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="col-md-5 p-5">
+<form method="post">
+    <h1>Add Task</h1>
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(size=32, class="form-control mb-3") }}
+    </div>
+    <div>
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(rows=5, cols=50, class="form-control mb-3") }}
+    </div>
+    <div>
+        {{ form.due_date.label(class="form-label") }}
+        {{ form.due_date(class="form-control mb-3") }}
+    </div>
+    <div>
+        {{ form.submit(class="btn btn-primary mb-3") }}
+    </div>
+</form>
+</div>
+
+<script>
+    document.getElementById('add_task').classList.add("active")
+    document.getElementById('add_task').classList.remove("link-body-emphasis")
+</script>
+
+{% endblock %}

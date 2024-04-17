@@ -1,35 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Task</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Edit Task</h1>
-        </div>
-    </header>
+{% extends "base.html" %}
 
-    <nav>
-        <div class="container">
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/add">Add Task</a></li>
-            </ul>
-        </div>
-    </nav>
-    
-    <main>
-        <div class="container">
-            <form method="post">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                <input type="text" name="task" value="{{ task.content }}" required>
-                <textarea name="description">{{ task.description }}</textarea>
-                <input type="date" name="due_date" value="{{ task.due_date }}">
-                <input type="submit" value="Update">
-            </form>
-        </div>
-    </main>
-</body>
-</html>
+{% block title %}
+Edit Task - {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="col-md-5 p-5">
+<form method="post">
+    <h1>Edit Task</h1>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div>
+        <label class="form-label" for="name">Name</label>
+        <input class="form-control mb-3" type="text" name="name" value="{{ task.name }}" required>
+    </div>
+    <div>
+        <label class="form-label" for="description">Description</label>
+        <textarea class="form-control mb-3" name="description">{{ task.description }}</textarea>
+    </div>
+    <div>
+        <label class="form-label" for="due_date">Due Date</label>
+        <input class="form-control mb-3" type="date" name="due_date" value="{{ task.due_date }}">
+    </div>
+    <div>
+        <input class="btn btn-primary mb-3" type="submit" value="Update">
+    </div>
+</form>
+</div>
+
+<script>
+    document.getElementById('add_task').classList.add("active")
+    document.getElementById('add_task').classList.remove("link-body-emphasis")
+</script>
+
+{% endblock %}

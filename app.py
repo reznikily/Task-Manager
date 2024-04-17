@@ -1,118 +1,165 @@
-from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import desc, nullslast
 from datetime import datetime
 import secrets
+from forms import RegistrationForm, LoginForm, TaskForm
+from models import db, User, Task
+from dateutil import parser
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secrets.token_hex(16)  # Generate a secret key
 
-db = SQLAlchemy(app)
+db.init_app(app)
+
 migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    completed = db.Column(db.Boolean, default=False, nullable=False)
-    due_date = db.Column(db.Date, nullable=True)
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful. Please log in.', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Sign Up', form=form)
 
-    def __repr__(self):
-        return f'<Task {self.id}: {self.content}>'
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and user.check_password(form.password.data):
+            session['user_id'] = user.id
+            session['username'] = user.username
+            flash('Login successful.', 'success')
+            return redirect(url_for('tasks'))
+        else:
+            flash('Invalid username or password.', 'danger')
+    return render_template('login.html', title='Log In', form=form)
 
-@app.route('/')
-def index():
-    uncompleted_tasks = Task.query.filter_by(completed=False).order_by(nullslast(desc(Task.due_date))).all()
-    completed_tasks = Task.query.filter_by(completed=True).order_by(nullslast(desc(Task.due_date))).all()
-    
-    return render_template('index.html', uncompleted_tasks=uncompleted_tasks, completed_tasks=completed_tasks)
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
 
-@app.route('/add', methods=['GET', 'POST'])
+def get_tasks_by_user_id(user_id):
+    return Task.query.filter_by(user_id=user_id).all()
+
+@app.route('/', methods=['GET', 'POST'])
+def tasks():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'danger')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    uncompleted_tasks = Task.query.filter_by(user_id=user_id, completed=False).all()
+    completed_tasks = Task.query.filter_by(user_id=user_id, completed=True).all()
+
+    return render_template('tasks.html', username=session['username'], uncompleted_tasks=uncompleted_tasks, completed_tasks=completed_tasks)
+
+@app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
-    if request.method == 'POST':
-        task_content = request.form.get('task')
-        task_description = request.form.get('description')
-        due_date_str = request.form.get('due_date')
+    if 'user_id' not in session:
+        flash('Please log in first.', 'danger')
+        return redirect(url_for('login'))
+    
+    form = TaskForm()
+    
+    if form.validate_on_submit():
+        user_id = session['user_id']
+
+        new_task = Task(
+            name=form.name.data,
+            description=form.description.data,
+            due_date=form.due_date.data,
+            user_id=user_id
+        )
         
-        print(f"Due Date String: {due_date_str}")  # Debugging
-        try:
-            due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date() if due_date_str else None
-            print(f"Due Date Object: {due_date}")  # Debugging
-        except ValueError as e:
-            print(f"Error parsing date: {e}")  # Debugging
-        
-        new_task = Task(content=task_content, description=task_description, due_date=due_date)
         db.session.add(new_task)
         db.session.commit()
-        return redirect(url_for('index'))
+        
+        flash('Task added successfully.', 'success')
+        return redirect(url_for('tasks'))
+    else:
+        flash('Date can not be empty.', 'error')
     
-    return render_template('add_task.html')
+    return render_template('add_task.html', username=session['username'], form=form)
 
-@app.route('/edit/<int:task_id>', methods=['GET', 'POST'])
+@app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 def edit_task(task_id):
-    task = Task.query.get(task_id)
+    if 'user_id' not in session:
+        flash('Please log in first.', 'danger')
+        return redirect(url_for('login'))
     
-    if task is None:
-        return redirect(url_for('index'))
+    user_id = session['user_id']
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
     
     if request.method == 'POST':
-        task.content = request.form.get('task')
-        task.description = request.form.get('description')
-        due_date_str = request.form.get('due_date')
-        
-        print(f"Due Date String: {due_date_str}")  # Debugging
-        try:
-            task.due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date() if due_date_str else None
-            print(f"Due Date Object: {task.due_date}")  # Debugging
-        except ValueError as e:
-            print(f"Error parsing date: {e}")  # Debugging
+        task.name = request.form['name']
+        task.description = request.form['description']
+        task.due_date = parser.parse(request.form['due_date'])
         
         db.session.commit()
-        return redirect(url_for('index'))
+        flash('Task updated successfully.', 'success')
+        return redirect(url_for('tasks'))
     
-    return render_template('edit_task.html', task=task)
+    return render_template('edit_task.html', username=session['username'], task=task)
 
+@app.route('/mark_completed/<int:task_id>', methods=['GET', 'POST'])
+def mark_completed(task_id):
+    if 'user_id' not in session:
+        flash('Please log in first.', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
+    
+    task.completed = True
+    db.session.commit()
+    flash('Task marked as completed.', 'success')
+    return redirect(url_for('tasks'))
 
-@app.route('/delete/<int:task_id>', methods=['POST', 'DELETE'])
+@app.route('/delete_task/<int:task_id>', methods=['GET', 'POST'])
 def delete_task(task_id):
-    task = Task.query.get(task_id)
+    if 'user_id' not in session:
+        flash('Please log in first.', 'danger')
+        return redirect(url_for('login'))
     
-    if task:
-        db.session.delete(task)
-        db.session.commit()
+    user_id = session['user_id']
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
     
-    return redirect(url_for('index'))
+    db.session.delete(task)
+    db.session.commit()
+    flash('Task deleted successfully.', 'success')
+    return redirect(url_for('tasks'))
+
+@app.route('/mark_incomplete/<int:task_id>', methods=['GET', 'POST'])
+def mark_incomplete(task_id):
+    if 'user_id' not in session:
+        flash('Please log in first.', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
+    
+    task.completed = False
+    db.session.commit()
+    
+    flash('Task marked as incomplete.', 'success')
+    return redirect(url_for('tasks'))
 
 @app.before_request
 def before_request():
     if request.method == 'POST' and request.form.get('_method'):
         request.environ['REQUEST_METHOD'] = request.form.get('_method').upper()
-
-@app.route('/complete/<int:task_id>')
-def complete_task(task_id):
-    task = Task.query.get(task_id)
-    
-    if task:
-        task.completed = True
-        db.session.commit()
-    
-    return redirect(url_for('index'))
-
-@app.route('/incomplete/<int:task_id>')
-def incomplete_task(task_id):
-    task = Task.query.get(task_id)
-    
-    if task:
-        task.completed = False
-        db.session.commit()
-    
-    return redirect(url_for('index'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)
