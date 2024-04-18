@@ -111,7 +111,10 @@ def edit_task(task_id):
         return redirect(url_for('login'))
     
     user_id = session['user_id']
-    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+    if not task:
+        flash('This task doesn\'t exist', 'danger')
+        return redirect('/')
     
     if request.method == 'POST':
         task.name = request.form['name']
@@ -131,7 +134,10 @@ def mark_completed(task_id):
         return redirect(url_for('login'))
     
     user_id = session['user_id']
-    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+    if not task:
+        flash('This task doesn\'t exist', 'danger')
+        return redirect('/')
     
     task.completed = True
     db.session.commit()
@@ -145,7 +151,10 @@ def delete_task(task_id):
         return redirect(url_for('login'))
     
     user_id = session['user_id']
-    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+    if not task:
+        flash('This task doesn\'t exist', 'danger')
+        return redirect('/')
     
     db.session.delete(task)
     db.session.commit()
@@ -159,7 +168,10 @@ def mark_incomplete(task_id):
         return redirect(url_for('login'))
     
     user_id = session['user_id']
-    task = Task.query.filter_by(id=task_id, user_id=user_id).first_or_404()
+    task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+    if not task:
+        flash('This task doesn\'t exist', 'danger')
+        return redirect('/')
     
     task.completed = False
     db.session.commit()
