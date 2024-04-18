@@ -31,7 +31,7 @@ def register():
             flash('Registration successful. Please log in.', 'success')
             return redirect(url_for('login'))
         else:
-            flash("Username is already exists.", 'error')
+            flash("Username already exists.", 'error')
     else:
         flash("Passwords are not the same.", 'error')
     
