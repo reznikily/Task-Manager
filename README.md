@@ -7,4 +7,4 @@ Available on: https://reznikily.pythonanywhere.com/
 - Flask
 - Sqlalchemy
 - SQLite
-- HTML, CSS, JS, Bootstrap 4
+- HTML, CSS, JS, Bootstrap 5
